@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4CAF50">
+    <title>Калькулятор премий БСУ</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <style>
+        /* Все ваши стили остаются без изменений */
+        body { /* ... */ }
+        .calculator { /* ... */ }
+        /* ... остальные стили ... */
+        
+        /* Добавляем стиль для уведомления об установке */
+        #installContainer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div id="installContainer">
+        <p>Установите приложение для быстрого доступа!</p>
+        <button id="installButton">Установить</button>
+        <button id="dismissButton">Позже</button>
+    </div>
+
+    <!-- Весь ваш HTML-код приложения -->
+    <h1>Калькулятор премий операторов</h1>
+    <div class="calculator">...</div>
+    <div class="stats">...</div>
+
+    <script>
+        // ===== PWA Функционал для GitHub Pages =====
+        let deferredPrompt;
+        const installContainer = document.getElementById('installContainer');
+        const installButton = document.getElementById('installButton');
+        const dismissButton = document.getElementById('dismissButton');
+
+        // Показать предложение установки
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Показываем через 30 секунд после загрузки
+            setTimeout(() => {
+                installContainer.style.display = 'block';
+            }, 30000);
+        });
+
+        // Обработка установки
+        installButton.addEventListener('click', async () => {
+            installContainer.style.display = 'none';
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('Приложение установлено');
+            }
+            deferredPrompt = null;
+        });
+
+        // Скрыть предложение
+        dismissButton.addEventListener('click', () => {
+            installContainer.style.display = 'none';
+        });
+
+        // Проверка, установлено ли приложение
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA установлено');
+            installContainer.style.display = 'none';
+        });
+
+        // Регистрация Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker зарегистрирован:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Ошибка регистрации ServiceWorker:', error);
+                    });
+            });
+        }
+
+        // Ваш основной код приложения остается без изменений
+        // ... функции calculateAuto, saveData и т.д. ...
+    </script>
+</body>
+</html>
